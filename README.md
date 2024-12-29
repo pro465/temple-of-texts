@@ -18,3 +18,13 @@ The encryption algorithm itself is quite simple and probably is broken cryptogra
 Which is why, if you are able to recover the key and enter it in the "game", you get a winning end text and the program halts.
 So this could be interpreted as a text adventure in which you are lost and try to find out where you are, 
 since recovering the key means you've figured out your position as well.
+
+# Contents
+
+Just to help you comprehend it somewhat, I've developed a list of things it contains somewhere in one of its infinite walls (inexhaustive, of course):
+
+- Assuming some encoding which allows it, every single work of humanity.
+- A complete history of the observable universe, down to the atom.
+- Every single way your life could have played out.
+- The strongest arguments for and against every philosophical idea humanity can ever think of.
+- All of the above concatenated to form a single string.

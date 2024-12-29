@@ -7,6 +7,7 @@ def bij(pos):
     p=[y, r-x, 3*r+x, 2*r-y][(y<0)*2+(x<0)]
     return r*(r-1)*2+(r>0)+p
 
+# Feistel cipher + linear congruential generator 
 def encrypt(num, key):
     b=num.bit_length()
     bm=(b+1)//2
@@ -18,7 +19,7 @@ def encrypt(num, key):
         block=key&k_mask
         key>>=k_block_len
         block=block*2+1
-        l,r=((l*block+1)&mask)^r, l
+        for _ in range(10): l,r=((l*block+1)&mask)^r, l
 
     return (l<<bm|r|(1<<bm*2))-1
 
