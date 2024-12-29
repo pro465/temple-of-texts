@@ -1,5 +1,7 @@
 # The Temple of texts
 
+![Icon](icon.svg)
+
 The Temple of Texts is a variation of [The Library of Babel website](https://en.wikipedia.org/wiki/The_Library_of_Babel_(website)).
 
 It modifies it so that:   
