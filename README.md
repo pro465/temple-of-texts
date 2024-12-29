@@ -12,8 +12,9 @@ the character set is `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345
 
 # How it works
 
-You are dropped into a random part of the infinite grid of octagons, facing a random wall. Moving north/south/east/west is consistent throughout a single session, 
-but which way they move w.r.t. the internal grid is randomly determined at the start. The program also generates a random key, with which it encrypts the position in the grid 
-to obtain the texts on the walls. The encryption algorithm itself is quite simple and probably is broken cryptographically. (You can check it in the source code.)
+You are dropped into a random part of the infinite grid of octagons, facing a random wall/door. 
+The program also generates a random key, with which it encrypts the position in the grid to obtain the texts on the walls.
+The encryption algorithm itself is quite simple and probably is broken cryptographically. (You can check it in the source code.)
 Which is why, if you are able to recover the key and enter it in the "game", you get a winning end text and the program halts.
-So this could be interpreted as a text adventure in which you are lost and try to find out where you are, since recovering the key means you've figured out your position as well.
+So this could be interpreted as a text adventure in which you are lost and try to find out where you are, 
+since recovering the key means you've figured out your position as well.

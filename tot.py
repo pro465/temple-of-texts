@@ -7,7 +7,6 @@ def bij(pos):
     p=[y, r-x, 3*r+x, 2*r-y][(y<0)*2+(x<0)]
     return r*(r-1)*2+(r>0)+p
 
-# (2n+1)k=l2^m+1
 def encrypt(num, key):
     b=num.bit_length()
     bm=(b+1)//2
@@ -37,7 +36,7 @@ def get_num(key, hxpos, wallno):
 
 def get_text(key, hxpos, wallno):
     n=get_num(key, hxpos, wallno)
-    all_chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.!? "
+    all_chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.!?() "
     num_chars=len(all_chars)
     res=""
     while n>0:
@@ -69,7 +68,7 @@ from the shock at the surreality of your surroundings, you start to remember
 how you got here: that damn pit in the ground. You had noticed it, but too late. 
 As you try to remember the details of your fall, a distinct text appears in your mind. 
 It read:
-"There is only one key, but infinite locks. Fortunately you need to unlock only one to escape."
+"There are infinite locks, but only one key. Fortunately you need only one to escape."
 Suspiciously, it was written in the same font as the walls of text in front of you.
 The walls are tall, and full of text. Seemingly gibberish text....
 
@@ -83,9 +82,9 @@ to get out of here as soon as possible...
 
 help_msg="""
 h -- show this message.
-n/s/e/w -- move north/south/east/west according to your compass, which may or may not be broken.
-l/r -- turn left/right, to face another wall of text.
-t -- show the text written on the wall before you.
+l/r -- turn left/right.
+m -- move into the room behind the door in front of you.
+s -- show what's before you.
 k -- enter the key to escape.
 q -- quit this game.
 """
@@ -102,12 +101,9 @@ print(intro)
 prob=5000
 key=rand_uint(5*prob)
 hxpos=(rand_int(prob), rand_int(prob))
-wallno=randrange(4)
+facedir=randrange(8)
 directions=[(0, -1), (-1, 0), (0, 1), (1, 0)]
-off=randrange(4)
-directions=directions[off:]+directions[:off]
-del off
-validcmds="hlrnsewtqk"
+validcmds="hlrmsqk"
 
 while True:
     inp=input("> ").strip()
@@ -120,13 +116,17 @@ while True:
             break
         print("Wrong!")
     elif inp in "lr":
-        wallno+=(inp=="r")*2-1
-        wallno&=3
-    elif inp in "nesw":
-        i="nesw".index(inp)
-        hxpos=add(hxpos, directions[i])
-    elif inp=="t":
-        print("the text in the wall before you reads:")
-        show_text(key, hxpos, wallno)
+        facedir+=(inp=="r")*2-1
+        facedir&=7
+    elif inp == "m":
+        if facedir&1==0:
+            hxpos=add(hxpos, directions[facedir>>1])
+        else: print("You must be facing a door to be able to move through it.")
+            
+    elif inp == "s":
+        if facedir&1:
+            print("The text in the wall before you reads:")
+            show_text(key, hxpos, facedir>>1)
+        else: print("A black, rusty door stands before you.")
     elif inp=="q": break
     else: print("wtf")
