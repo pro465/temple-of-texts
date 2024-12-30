@@ -8,7 +8,7 @@ It modifies it so that:
     1. It contains every possible finite string of text of a certain character set (see below for details), instead of just 410*3200 charactes.   
     2. The feeling of being lost is enhanced by allowing only moving and reading, instead of being dinimished by extraneous features that break that feeling (like searching).   
 
-the character set is `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.!? `.
+the character set is `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.!?() `.
 
 # How it works
 
