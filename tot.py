@@ -8,18 +8,22 @@ def bij(pos):
     return r*(r-1)*2+(r>0)+p
 
 # Feistel cipher + linear congruential generator 
-def encrypt(num, key):
+def encrypt(num, key, block_len=5):
     b=num.bit_length()
+    m=(1<<b)-1
+    
     bm=(b+1)//2
     mask=(1<<bm)-1
+    
     l,r=num>>bm,num&mask
-    k_block_len=20
-    k_mask=(1<<k_block_len)-1
-    while key>0:
-        block=key&k_mask
-        key>>=k_block_len
-        block=block*2+1
-        for _ in range(10): l,r=((l*block+1)&mask)^r, l
+    
+    key_mask=(1<<block_len)-1
+    block=key&key_mask
+    
+    l,r=(l*(2*block+1)&mask)^r, l
+
+    if (key>>block_len)>0 and b>10:
+        l,r=(encrypt(l, key>>block_len)&mask)^r, l
 
     return (l<<bm|r|(1<<bm*2))-1
 
@@ -32,8 +36,10 @@ def rand_uint(prob):
 def rand_int(prob):
     return rand_uint(prob)*(randrange(2)*2-1)
 
-def get_num(key, hxpos, wallno):
-    return encrypt(bij(hxpos)*4+wallno, key)
+def get_num(key, hxpos, wallno, count=10):
+    res=bij(hxpos)*4+wallno
+    for _ in range(count): res=encrypt(res, key)
+    return res
 
 def get_text(key, hxpos, wallno):
     n=get_num(key, hxpos, wallno)
