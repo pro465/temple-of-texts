@@ -12,13 +12,14 @@ def rot(a, n, l):
     mask=(1<<abs(n))-1
     if n>0: return (a<<n)&mask|(a>>l-n)
     n=-n
-    return (a>>n)|((a&mask)<<l-n)
+    return (a>>n)|(a<<l-n)&mask
 
 def hash_(prev, num, k, mask, block_len):
-    prev^=rot(k, prev&15, block_len)
+    prev=(k|1)*prev+1
+    prev^=prev<<9
     return (prev^num)&mask
 
-def encrypt(num, key, block_len=30):
+def encrypt(num, key, block_len=32, t=False):
     res=0
     num+=1
     nbits_o=num.bit_length()
@@ -36,6 +37,7 @@ def encrypt(num, key, block_len=30):
         if k==0: k=key
         prev=hash_(prev, num, k, mask, block_len)
         res|=prev<<i
+        if t: prev=num&mask
         num>>=block_len
     nbits=res.bit_length()
     nzeroblocks=(nblocks*block_len-nbits)//block_len
@@ -51,38 +53,6 @@ def eea(a, b):
         a, b = b, a-b*q
     return a0
 
-def invert(output, prev, k, mask, block_len):
-    prev^=rot(k, prev&15, block_len)
-    return (output^prev)&mask
-
-# only used for testing
-def decrypt(num, key, block_len=30):
-    res=0
-    num+=1
-    nbits_o=num.bit_length()
-    num&=(1<<nbits_o-1)-1
-    nbits=num.bit_length()
-    nzeros=nbits_o-nbits-1
-    nblocks=(nbits+block_len-1)//block_len+nzeros
-    mask=(1<<block_len)-1
-    k=key
-    res=0
-    prev=k&mask
-    for i in range(nblocks):
-        i*=block_len
-        k>>=block_len
-        if k==0: k=key
-        output=(num>>i)&mask
-        curr=invert(output, prev, k, mask, block_len)
-        res|=curr<<i
-        prev=output
-
-    nbits=res.bit_length()
-    nzeroblocks=(nblocks*block_len-nbits)//block_len
-
-    return (res|(1<<nzeroblocks+nbits))-1
-
-
 def rand_uint(prob):
     res=0
     while randrange(prob)>0:
@@ -95,7 +65,7 @@ def rand_int(prob):
 def get_num(key, hxpos, wallno):
     num=bij(hxpos)*4+wallno
     res=encrypt(num, key)
-    assert decrypt(res, key)==num
+    assert encrypt(res, key, t=True)==num
     return res
 
 def get_text(key, hxpos, wallno):
