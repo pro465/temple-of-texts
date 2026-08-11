@@ -44,15 +44,6 @@ def encrypt(num, key, block_len=32, t=False):
 
     return (res|(1<<nzeroblocks+nbits))-1
 
-def eea(a, b):
-    a0, a1 = 1, 0
-
-    while b > 0:
-        q=a//b
-        a0, a1 = a1, a0-a1*q
-        a, b = b, a-b*q
-    return a0
-
 def rand_uint(prob):
     res=0
     while randrange(prob)>0:
