@@ -1,0 +1,6 @@
+h -- show this message.
+l/r -- turn left/right.
+m -- move into the room behind the door in front of you.
+s -- show what's before you.
+k -- enter the key to escape.
+q -- quit this game.
