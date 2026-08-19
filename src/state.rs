@@ -1,4 +1,4 @@
-use crate::code::{InvalidCodeError, Result as SResult, Serde, bytes_to_code, code_to_bytes};
+use crate::code::{ParseError, Result as SResult, Serde, bytes_to_code, code_to_bytes};
 use crate::crypto::Key;
 use crate::crypto::encrypt;
 use crate::num::Num;
@@ -49,10 +49,10 @@ impl Distribution<State> for StandardUniform {
 }
 
 fn parse_direction(bytes: &[u8]) -> SResult<(u8, &[u8])> {
-    if let Some(byte @ 0..8) = bytes.get(0).copied() {
-        Ok((byte, &bytes[1..]))
-    } else {
-        Err(InvalidCodeError)
+    match bytes.get(0).copied() {
+        Some(byte @ 0..8) => Ok((byte, &bytes[1..])),
+        Some(_) => Err(ParseError::IllegalByteError),
+        None => Err(ParseError::EarlyEndError),
     }
 }
 
@@ -84,19 +84,13 @@ impl Serde for State {
 }
 
 impl State {
-    pub fn from_code(code: &str) -> Result<Self, InvalidCodeError> {
+    pub fn from_code(code: &str) -> Result<Self, ParseError> {
         let bytes = code_to_bytes(code)?;
         Self::from_bytes(&bytes)
     }
 
     pub fn to_code(&self) -> String {
         let bytes = self.into_bytes();
-        #[cfg(debug_assertions)]
-        println!(
-            "length {} output length {}",
-            self.positionx.len() + self.positiony.len() + 33,
-            bytes.len()
-        );
         bytes_to_code(bytes)
     }
 }

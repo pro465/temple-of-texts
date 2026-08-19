@@ -158,6 +158,22 @@ fn bijbase256_conversion_works() {
 }
 
 #[test]
+fn num_increment_decrement_works() {
+    let mut rng = rand::rng();
+
+    for _ in 0..50000 {
+        let mut v = vec![0;2];
+        rng.fill(&mut v);
+        let mut num = Num::new(rng.random(), v);
+        let ncpy = num.clone();
+        num.increment();
+        num.decrement();
+        assert_eq!(num, ncpy);
+    }
+
+}
+
+#[test]
 fn combine_works() {
     let num1 = Num::new(Sign::Negative, vec![0b1110]);
     let num2 = Num::new(Sign::Positive, vec![0b0101]);

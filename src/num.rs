@@ -1,4 +1,4 @@
-use crate::code::InvalidCodeError;
+use crate::code::ParseError;
 use crate::code::{Result as SResult, Serde};
 use crate::utils::from_bijbase256;
 
@@ -83,7 +83,7 @@ pub(crate) struct Num {
 }
 
 fn convert<T>(a: Option<T>) -> SResult<T> {
-    a.ok_or(InvalidCodeError)
+    a.ok_or(ParseError::EarlyEndError)
 }
 
 impl Serde for Num {
@@ -120,7 +120,7 @@ impl Serde for Num {
                 match nextbyte {
                     0 => break,
                     1 => {}
-                    2.. => return Err(InvalidCodeError),
+                    2.. => return Err(ParseError::IllegalByteError),
                 }
             }
 
@@ -154,10 +154,6 @@ impl Num {
         } else if d == 1 {
             self.increment();
         }
-    }
-
-    pub(crate) fn len(&self) -> usize {
-        self.digits.len() + 1
     }
 
     // bits:
