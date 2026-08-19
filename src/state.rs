@@ -1,22 +1,16 @@
-use crate::crypto::encrypt;
+use crate::code::{InvalidCodeError, Result as SResult, Serde, bytes_to_code, code_to_bytes};
 use crate::crypto::Key;
+use crate::crypto::encrypt;
 use crate::num::Num;
-use crate::utils::{textbox, self};
+use crate::utils::textbox;
 
-use ciborium::{from_reader_with_buffer, into_writer};
-use rand::{Rng, RngExt};
 use rand::distr::{Distribution, StandardUniform};
-use serde::{Serialize, Deserialize};
-
-use std::io::{Cursor, Error};
+use rand::{Rng, RngExt};
 
 pub struct HitWallError;
 
-#[derive(Debug)]
-pub struct InvalidCodeError;
-
 // probability of the Nums in State ending at each step of the generation process
-// so that the probability of the number being L (base 256) digits long is 
+// so that the probability of the number being L (base 256) digits long is
 //       (1-END_PROB)^L
 
 const END_PROB: f64 = 0.001;
@@ -35,7 +29,7 @@ const DELTAS: [(i8, i8); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
 
 const CHARMAP: [char; 256] = include!("chars.txt");
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct State {
     positionx: Num,
     positiony: Num,
@@ -49,23 +43,61 @@ impl Distribution<State> for StandardUniform {
             positionx: Num::rand_num(rng, END_PROB),
             positiony: Num::rand_num(rng, END_PROB),
             key: rng.random(),
-            direction: rng.random::<u8>()&7,
+            direction: rng.random::<u8>() & 7,
         }
+    }
+}
+
+fn parse_direction(bytes: &[u8]) -> SResult<(u8, &[u8])> {
+    if let Some(byte @ 0..8) = bytes.get(0).copied() {
+        Ok((byte, &bytes[1..]))
+    } else {
+        Err(InvalidCodeError)
+    }
+}
+
+impl Serde for State {
+    // format: direction | key | positionx | positiony
+    fn write_bytes(&self, buf: &mut Vec<u8>) {
+        buf.push(self.direction);
+        self.key.write_bytes(buf);
+        self.positionx.write_bytes(buf);
+        self.positiony.write_bytes(buf);
+    }
+
+    fn from_bytes_prefix(bytes: &[u8]) -> SResult<(Self, &[u8])> {
+        let (direction, bytes) = parse_direction(bytes)?;
+        let (key, bytes) = Key::from_bytes_prefix(bytes)?;
+        let (positionx, bytes) = Num::from_bytes_prefix(bytes)?;
+        let (positiony, bytes) = Num::from_bytes_prefix(bytes)?;
+
+        Ok((
+            State {
+                positionx,
+                positiony,
+                key,
+                direction,
+            },
+            bytes,
+        ))
     }
 }
 
 impl State {
     pub fn from_code(code: &str) -> Result<Self, InvalidCodeError> {
-        let bytes = utils::from_code(code)
-                          .map_err(|_| InvalidCodeError)?;
-        from_reader_with_buffer(&bytes[..], &mut vec![0; 65536])
-            .map_err(|_| InvalidCodeError)
+        let bytes = code_to_bytes(code)?;
+        Self::from_bytes(&bytes)
     }
 
     pub fn to_code(&self) -> String {
-        let mut bytes = Vec::new();
-        into_writer(self, Cursor::new(&mut bytes));
-        utils::to_code(bytes)
+        let bytes = self.into_bytes();
+        #[cfg(debug_assertions)]
+        println!(
+            "length {} output length {}",
+            self.positionx.len() + self.positiony.len() + 33,
+            bytes.len()
+        );
+        bytes_to_code(bytes)
     }
 }
 
@@ -84,7 +116,9 @@ impl State {
 
     fn describe_wall(&self) -> String {
         debug_assert!(!self.door_in_front());
-        let mut bytes = self.positionx.combine(&self.positiony, self.direction/2, 2);
+        let mut bytes = self
+            .positionx
+            .combine(&self.positiony, self.direction / 2, 2);
 
         encrypt(&mut bytes, self.key);
 
@@ -94,9 +128,10 @@ impl State {
             res.push(CHARMAP[usize::from(byte)]);
         }
 
-
-        format!("A wall of text stands before you. It reads:\n{}",
-                textbox(res))
+        format!(
+            "A wall of text stands before you. It reads:\n{}",
+            textbox(res)
+        )
     }
 
     pub fn move_forward(&mut self) -> Result<(), HitWallError> {
@@ -123,4 +158,3 @@ impl State {
         self.direction &= 7;
     }
 }
-

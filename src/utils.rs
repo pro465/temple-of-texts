@@ -1,8 +1,3 @@
-use crate::state::InvalidCodeError;
-
-use base64::Engine;
-use base64::engine::general_purpose::STANDARD as BASE64;
-
 // normal base: contains no "leading" (actually trailing in the Vec) 0's
 // bijective base 256: can contain "leading" 0's.
 //     0's function as a digit "256" in this base.
@@ -34,31 +29,6 @@ pub(crate) fn to_bijbase256(num: &mut Vec<u8>) {
     }
 }
 
-fn checksum(bytes: &[u8]) -> u8 {
-    let mut res = 0u8;
-    for &b in bytes {
-        res = res.wrapping_add(b);
-    }
-    res
-}
-
-pub(crate) fn to_code(mut bytes: Vec<u8>) -> String {
-    bytes.push(checksum(&bytes[..]));
-    BASE64.encode(bytes)
-}
-
-pub(crate) fn from_code(code: &str) -> Result<Vec<u8>, InvalidCodeError> {
-    let mut bytes = BASE64.decode(code).map_err(|_| InvalidCodeError)?;
-    let cs = bytes.pop().ok_or(InvalidCodeError)?;
-
-    if cs == checksum(&bytes[..]) {
-        Ok(bytes)
-    } else {
-        Err(InvalidCodeError)
-    }
-}
-
-
 const HOR_MARGIN: usize = 3;
 const VER_MARGIN: usize = 1;
 const COL_WIDTH: usize = 80;
@@ -81,7 +51,7 @@ pub(crate) fn textbox(s: String) -> String {
     }
 
     let mut i = 0;
-    
+
     for c in s.chars() {
         if i == 0 {
             res.push('║');
@@ -89,14 +59,14 @@ pub(crate) fn textbox(s: String) -> String {
         }
 
         res.push(c);
-        
-        if i == COL_WIDTH-1 {
+
+        if i == COL_WIDTH - 1 {
             repeated_push(&mut res, ' ', HOR_MARGIN);
             res.push_str("║\n");
         }
 
-        i+=1;
-        i%=COL_WIDTH;
+        i += 1;
+        i %= COL_WIDTH;
     }
 
     if i != 0 {
@@ -109,7 +79,7 @@ pub(crate) fn textbox(s: String) -> String {
         repeated_push(&mut res, ' ', COL_WIDTH + HOR_MARGIN * 2);
         res.push_str("║\n");
     }
-    
+
     res.push('╚');
     repeated_push(&mut res, '═', COL_WIDTH + HOR_MARGIN * 2);
     res.push_str("╝\n");

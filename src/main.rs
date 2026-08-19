@@ -1,5 +1,5 @@
-use std::io::{stdin, stdout, Write, self};
-use temple_of_texts::state::{State, HitWallError};
+use std::io::{self, Write, stdin, stdout};
+use temple_of_texts::state::{HitWallError, State};
 
 const INTRO: &str = include_str!("intro.txt");
 const HELP: &str = include_str!("help.txt");
@@ -34,12 +34,13 @@ fn main() -> io::Result<()> {
                 format!("You turn right, to a {}", description)
             }
             "q" | "quit" => break,
-            "m" | "move" => {
-                match state.move_forward() {
-                    Ok(()) => "You open the door and get through it, to a seemingly identical room.",
-                    Err(HitWallError) => "Oops! You lightly hit your head against the wall in front of you.",
-                }.to_string()
+            "m" | "move" => match state.move_forward() {
+                Ok(()) => "You open the door and get through it, to a seemingly identical room.",
+                Err(HitWallError) => {
+                    "Oops! You lightly hit your head against the wall in front of you."
+                }
             }
+            .to_string(),
             "dump" => state.to_code(),
             "load" => {
                 prompt("Enter code: ")?;
@@ -55,7 +56,7 @@ fn main() -> io::Result<()> {
             }
             "s" | "show" => state.describe(),
             "k" | "key" => todo!(),
-            _ => HELP.to_string()
+            _ => HELP.to_string(),
         };
         println!("{}", s);
         prompt("> ")?;

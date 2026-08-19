@@ -1,6 +1,9 @@
-use crate::utils::*;
+use crate::code::*;
 use crate::crypto::*;
 use crate::num::{Num, Sign};
+use crate::state::State;
+use crate::utils::*;
+
 use rand::prelude::*;
 
 fn rand_bytes(rng: &mut impl Rng, minlen: usize, prob: f64) -> Vec<u8> {
@@ -25,19 +28,19 @@ fn diffusion_score(mut r: Vec<u8>, key: Key) -> (f64, f64) {
             r_copyt[i] ^= 1 << j;
             encrypt_internal(&mut r_copyt, key);
             for k in 0..r.len() {
-                score1+=(r[k]^r_copyt[k]).count_zeros();
+                score1 += (r[k] ^ r_copyt[k]).count_zeros();
             }
             let mut val = r.len() * 8;
             for k in 0..r.len() {
-                let idx = r.len()-k-1;
-                let diff = r[idx]^r_copyt[idx];
+                let idx = r.len() - k - 1;
+                let diff = r[idx] ^ r_copyt[idx];
 
-                if diff>0 {
-                    val=k*8+usize::try_from(diff.leading_zeros()).unwrap();
-                    break
+                if diff > 0 {
+                    val = k * 8 + usize::try_from(diff.leading_zeros()).unwrap();
+                    break;
                 }
             }
-            score2+=val;
+            score2 += val;
         }
     }
     let tot_bits = (r.len() * 8) as f64;
@@ -116,7 +119,6 @@ fn internal_decryption_then_encryption_equals_id() {
     }
 }
 
-
 #[test]
 fn encryption_diffuses() {
     let mut rng = rand::rng();
@@ -165,14 +167,37 @@ fn combine_works() {
 }
 
 #[test]
-fn code_conversion_works() {
+fn code_byte_conversion_works() {
     let mut rng = rand::rng();
     let minlen = 10;
     for _ in 0..500 {
         let bytes = rand_bytes(&mut rng, minlen, 0.99);
-        let string = to_code(bytes.clone());
-        let bytes2 = from_code(&string).unwrap();
+        let string = bytes_to_code(bytes.clone());
+        let bytes2 = code_to_bytes(&string).unwrap();
         assert_eq!(bytes, bytes2);
     }
 }
 
+#[test]
+fn num_serde_works() {
+    let mut rng = rand::rng();
+
+    for _ in 0..500 {
+        let num = Num::rand_num(&mut rng, 0.999);
+        let bytes = num.into_bytes();
+        let num2 = Num::from_bytes(&bytes[..]).unwrap();
+        assert_eq!(num, num2);
+    }
+}
+
+#[test]
+fn state_serde_works() {
+    let mut rng = rand::rng();
+
+    for _ in 0..500 {
+        let state = rng.random::<State>();
+        let bytes = state.into_bytes();
+        let state2 = State::from_bytes(&bytes[..]).unwrap();
+        assert_eq!(state, state2);
+    }
+}
