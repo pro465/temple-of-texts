@@ -1,13 +1,19 @@
-use crate::crypto::{encrypt, decrypt};
+use crate::crypto::encrypt;
 use crate::crypto::Key;
 use crate::num::Num;
-use crate::utils::textbox;
+use crate::utils::{textbox, self};
 
+use ciborium::{from_reader_with_buffer, into_writer};
 use rand::{Rng, RngExt};
 use rand::distr::{Distribution, StandardUniform};
+use serde::{Serialize, Deserialize};
 
+use std::io::{Cursor, Error};
 
 pub struct HitWallError;
+
+#[derive(Debug)]
+pub struct InvalidCodeError;
 
 // probability of the Nums in State ending at each step of the generation process
 // so that the probability of the number being L (base 256) digits long is 
@@ -29,7 +35,7 @@ const DELTAS: [(i8, i8); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
 
 const CHARMAP: [char; 256] = include!("chars.txt");
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct State {
     positionx: Num,
     positiony: Num,
@@ -49,12 +55,17 @@ impl Distribution<State> for StandardUniform {
 }
 
 impl State {
-    pub fn from_code(code: String) -> Self {
-        todo!()
+    pub fn from_code(code: &str) -> Result<Self, InvalidCodeError> {
+        let bytes = utils::from_code(code)
+                          .map_err(|_| InvalidCodeError)?;
+        from_reader_with_buffer(&bytes[..], &mut vec![0; 65536])
+            .map_err(|_| InvalidCodeError)
     }
 
     pub fn to_code(&self) -> String {
-        todo!()
+        let mut bytes = Vec::new();
+        into_writer(self, Cursor::new(&mut bytes));
+        utils::to_code(bytes)
     }
 }
 

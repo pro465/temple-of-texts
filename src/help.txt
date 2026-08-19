@@ -1,6 +1,12 @@
-h -- show this message.
-l/r -- turn left/right.
-m -- move into the room behind the door in front of you.
-s -- show what's before you.
-k -- enter the key to escape.
-q -- quit this game.
+l/left -- turn left.
+r/right -- turn right.
+m/move -- move into the room behind the door in front of you.
+s/show -- show what's before you.
+k/key -- enter the key to escape.
+
+q/quit -- quit this game.
+
+dump -- dump current state in the form of a code.
+load -- load the state from code and resume the game.
+
+<anything else> -- show this message.

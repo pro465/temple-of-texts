@@ -1,5 +1,5 @@
 use std::io::{stdin, stdout, Write, self};
-use temple_of_texts::state::State;
+use temple_of_texts::state::{State, HitWallError};
 
 const INTRO: &str = include_str!("intro.txt");
 const HELP: &str = include_str!("help.txt");
@@ -8,9 +8,10 @@ fn main() -> io::Result<()> {
     println!("{}", INTRO);
     let mut state: State = rand::random();
     prompt("> ")?;
-    for l in stdin().lines() {
+    let mut lines = stdin().lines();
+    while let Some(l) = lines.next() {
         let s = match l?.trim() {
-            "l" => {
+            "l" | "left" => {
                 state.turn_left();
 
                 let description = if state.door_in_front() {
@@ -21,7 +22,7 @@ fn main() -> io::Result<()> {
 
                 format!("You turn left, to a {}", description)
             }
-            "r" => {
+            "r" | "right" => {
                 state.turn_right();
 
                 let description = if state.door_in_front() {
@@ -32,14 +33,28 @@ fn main() -> io::Result<()> {
 
                 format!("You turn right, to a {}", description)
             }
-            "q" => break,
-            "m" => {
+            "q" | "quit" => break,
+            "m" | "move" => {
                 match state.move_forward() {
-                    Err(HitWallError) => "Oops! You lightly hit your head against the wall in front of you.",
                     Ok(()) => "You open the door and get through it, to a seemingly identical room.",
+                    Err(HitWallError) => "Oops! You lightly hit your head against the wall in front of you.",
                 }.to_string()
             }
+            "dump" => state.to_code(),
+            "load" => {
+                prompt("Enter code: ")?;
+                let Some(input) = lines.next() else { break };
+
+                match State::from_code(input?.trim()) {
+                    Ok(s) => {
+                        state = s;
+                        "state loaded.".to_string()
+                    }
+                    Err(_) => "The entered code is not valid.".to_string(),
+                }
+            }
             "s" | "show" => state.describe(),
+            "k" | "key" => todo!(),
             _ => HELP.to_string()
         };
         println!("{}", s);

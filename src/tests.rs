@@ -1,4 +1,4 @@
-use crate::utils::{from_bijbase256, to_bijbase256};
+use crate::utils::*;
 use crate::crypto::*;
 use crate::num::{Num, Sign};
 use rand::prelude::*;
@@ -163,3 +163,16 @@ fn combine_works() {
 
     assert_eq!(num1.combine(&num2, 0b11, 2), expected_result);
 }
+
+#[test]
+fn code_conversion_works() {
+    let mut rng = rand::rng();
+    let minlen = 10;
+    for _ in 0..500 {
+        let bytes = rand_bytes(&mut rng, minlen, 0.99);
+        let string = to_code(bytes.clone());
+        let bytes2 = from_code(&string).unwrap();
+        assert_eq!(bytes, bytes2);
+    }
+}
+

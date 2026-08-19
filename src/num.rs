@@ -1,7 +1,8 @@
+use crate::utils::from_bijbase256;
+
 use rand::prelude::*;
 use rand::distr::StandardUniform;
-use crate::utils::{from_bijbase256, to_bijbase256};
-
+use serde::{Serialize, Deserialize};
 
 // bijective base 256 unsigned number
 pub(crate) type UNum = Vec<u8>;
@@ -37,7 +38,7 @@ fn interleave(a: u8, b: u8) -> u16 {
     res
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub(crate) enum Sign {
     Positive,
     Negative,
@@ -69,7 +70,7 @@ impl Sign {
 //     negative -> -|digits| - 1
 // where |digits| denotes the number represented by the UNum `digits`
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub(crate) struct Num {
     sign: Sign,
     digits: UNum,
