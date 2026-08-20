@@ -1,4 +1,6 @@
 use std::io::{self, Write, stdin, stdout};
+
+use temple_of_texts::code::Serde;
 use temple_of_texts::state::{HitWallError, State};
 
 const INTRO: &str = include_str!("intro.txt");

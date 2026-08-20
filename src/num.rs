@@ -1,5 +1,5 @@
 use crate::code::ParseError;
-use crate::code::{Result as SResult, Serde};
+use crate::code::{Result as SResult, SerdeBytes};
 use crate::utils::from_bijbase256;
 
 use rand::distr::StandardUniform;
@@ -86,7 +86,7 @@ fn convert<T>(a: Option<T>) -> SResult<T> {
     a.ok_or(ParseError::EarlyEndError)
 }
 
-impl Serde for Num {
+impl SerdeBytes for Num {
     fn write_bytes(&self, buf: &mut Vec<u8>) {
         buf.push(self.sign.to_byte());
 

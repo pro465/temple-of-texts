@@ -1,6 +1,6 @@
 pub mod state;
+pub mod code;
 
-mod code;
 mod crypto;
 mod num;
 mod utils;

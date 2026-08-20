@@ -41,12 +41,12 @@ pub(crate) fn code_to_bytes(code: &str) -> Result<Vec<u8>> {
 }
 
 /// represents an ability to convert oneself from and into a sequence of bytes
-pub(crate) trait Serde: Sized {
+pub(crate) trait SerdeBytes: Sized {
     fn write_bytes(&self, buf: &mut Vec<u8>);
 
     fn from_bytes_prefix(bytes: &[u8]) -> Result<(Self, &[u8])>;
 
-    fn into_bytes(&self) -> Vec<u8> {
+    fn to_bytes(&self) -> Vec<u8> {
         let mut v = Vec::new();
         self.write_bytes(&mut v);
         v
@@ -62,7 +62,7 @@ pub(crate) trait Serde: Sized {
     }
 }
 
-impl Serde for Key {
+impl SerdeBytes for Key {
     fn write_bytes(&self, buf: &mut Vec<u8>) {
         buf.extend(self.0.to_le_bytes());
         buf.extend(self.1.to_le_bytes());
@@ -79,5 +79,22 @@ impl Serde for Key {
         let second = u128::from_le_bytes(second);
 
         Ok(((first, second), &bytes[32..]))
+    }
+}
+
+pub trait Serde: Sized {
+    fn to_code(&self) -> String;
+    fn from_code(code: &str) -> Result<Self>;
+}
+
+impl<T: SerdeBytes> Serde for T {
+    fn to_code(&self) -> String {
+        let bytes = self.to_bytes();
+        bytes_to_code(bytes)
+    }
+
+    fn from_code(code: &str) -> Result<Self> {
+        let bytes = code_to_bytes(code)?;
+        Self::from_bytes(&bytes)
     }
 }

@@ -1,4 +1,4 @@
-use crate::code::{ParseError, Result as SResult, Serde, bytes_to_code, code_to_bytes};
+use crate::code::{ParseError, Result as SResult, Serde, SerdeBytes};
 use crate::crypto::Key;
 use crate::crypto::encrypt;
 use crate::num::Num;
@@ -56,7 +56,7 @@ fn parse_direction(bytes: &[u8]) -> SResult<(u8, &[u8])> {
     }
 }
 
-impl Serde for State {
+impl SerdeBytes for State {
     // format: direction | key | positionx | positiony
     fn write_bytes(&self, buf: &mut Vec<u8>) {
         buf.push(self.direction);
@@ -84,21 +84,8 @@ impl Serde for State {
 }
 
 impl State {
-    pub fn from_code(code: &str) -> SResult<Self> {
-        let bytes = code_to_bytes(code)?;
-        Self::from_bytes(&bytes)
-    }
-
-    pub fn to_code(&self) -> String {
-        let bytes = self.into_bytes();
-        bytes_to_code(bytes)
-    }
-}
-
-impl State {
-    pub fn check_key(&self, k: &str) -> SResult<bool> {
-        let bytes = code_to_bytes(k)?;
-        let entered_key = Key::from_bytes(&bytes)?;
+    pub fn check_key(&self, code: &str) -> SResult<bool> {
+        let entered_key = Key::from_code(code)?;
         Ok(entered_key == self.key)
     }
 
