@@ -6,9 +6,11 @@ The Temple of Texts is a variation of [The Library of Babel website](https://en.
 
 It modifies it so that:   
     1. It contains every possible finite string of text of a certain character set (see below for details), instead of just 410*3200 charactes.   
-    2. The feeling of being lost is enhanced by allowing only moving and reading, instead of being dinimished by extraneous features that break that feeling (like searching).   
+    2. The feeling of being lost is enhanced by allowing only moving and reading, instead of being diminished by extraneous features that break that feeling (like searching).    
 
-the character set is `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.!?() `.
+# What's new in the Rust rewrite?
+- Expanded character set. The character set is `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.!?() ` for the (older) [Python implementation](./tot.py); while the newer [Rust rewrite](./src/) uses a modified version of [Code page 437](https://en.wikipedia.org/wiki/Code_page_437) but with byte values 0 and 255 mapped to `‽` and `ඞ` respectively, instead.
+- You can now save the current state by saving the code outputted by `dump`, and load it in a later run by running `load` and entering the code.
 
 # How it works
 
