@@ -200,7 +200,7 @@ fn num_serde_works() {
 
     for _ in 0..500 {
         let num = Num::rand_num(&mut rng, 0.999);
-        let bytes = num.into_bytes();
+        let bytes = num.to_bytes();
         let num2 = Num::from_bytes(&bytes[..]).unwrap();
         assert_eq!(num, num2);
     }
@@ -212,7 +212,7 @@ fn state_serde_works() {
 
     for _ in 0..500 {
         let state = rng.random::<State>();
-        let bytes = state.into_bytes();
+        let bytes = state.to_bytes();
         let state2 = State::from_bytes(&bytes[..]).unwrap();
         assert_eq!(state, state2);
     }
