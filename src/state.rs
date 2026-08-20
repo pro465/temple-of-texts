@@ -84,7 +84,7 @@ impl Serde for State {
 }
 
 impl State {
-    pub fn from_code(code: &str) -> Result<Self, ParseError> {
+    pub fn from_code(code: &str) -> SResult<Self> {
         let bytes = code_to_bytes(code)?;
         Self::from_bytes(&bytes)
     }
@@ -96,6 +96,12 @@ impl State {
 }
 
 impl State {
+    pub fn check_key(&self, k: &str) -> SResult<bool> {
+        let bytes = code_to_bytes(k)?;
+        let entered_key = Key::from_bytes(&bytes)?;
+        Ok(entered_key == self.key)
+    }
+
     pub fn describe(&self) -> String {
         if self.door_in_front() {
             self.describe_door()

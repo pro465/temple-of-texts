@@ -3,6 +3,7 @@ use temple_of_texts::state::{HitWallError, State};
 
 const INTRO: &str = include_str!("intro.txt");
 const HELP: &str = include_str!("help.txt");
+const WINMSG: &str = include_str!("win_msg.txt");
 
 fn main() -> io::Result<()> {
     println!("{}", INTRO);
@@ -55,7 +56,18 @@ fn main() -> io::Result<()> {
                 }
             }
             "s" | "show" => state.describe(),
-            "k" | "key" => todo!(),
+            "k" | "key" => {
+                prompt("Enter key: ")?;
+                let Some(input) = lines.next() else { break };
+
+                match state.check_key(input?.trim()) {
+                    Ok(true) => {
+                        println!("{}", WINMSG);
+                        break;
+                    }
+                    _ => "The entered key didn't open the lock :(".to_string(),
+                }
+            }
             _ => HELP.to_string(),
         };
         println!("{}", s);
